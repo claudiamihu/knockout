@@ -684,6 +684,21 @@ describe('Deferred', function() {
             observable('B');
             expect(notifySpy.argsForCall).toEqual([ ['B'] ]);
         });
+
+        it('Is default behavior when "ko.options.deferUpdates" is "true"', function() {
+            this.restoreAfter(ko.options, 'deferUpdates');
+            ko.options.deferUpdates = true;
+
+            var observable = ko.observable();
+            var notifySpy = jasmine.createSpy('notifySpy');
+            observable.subscribe(notifySpy);
+
+            observable('A');
+            expect(notifySpy).not.toHaveBeenCalled();
+
+            jasmine.Clock.tick(1);
+            expect(notifySpy.argsForCall).toEqual([ ['A'] ]);
+        });
     });
 
     describe('Observable Array change tracking', function() {
@@ -784,6 +799,23 @@ describe('Deferred', function() {
             data('B');
             expect(computed()).toEqual('B');
             expect(notifySpy).not.toHaveBeenCalled();
+            jasmine.Clock.tick(1);
+            expect(notifySpy.argsForCall).toEqual([ ['B'] ]);
+        });
+
+        it('Is default behavior when "ko.options.deferUpdates" is "true"', function() {
+            this.restoreAfter(ko.options, 'deferUpdates');
+            ko.options.deferUpdates = true;
+
+            var data = ko.observable('A'),
+                computed = ko.computed(data),
+                notifySpy = jasmine.createSpy('notifySpy'),
+                subscription = computed.subscribe(notifySpy);
+
+            // Notification is deferred
+            data('B');
+            expect(notifySpy).not.toHaveBeenCalled();
+
             jasmine.Clock.tick(1);
             expect(notifySpy.argsForCall).toEqual([ ['B'] ]);
         });
